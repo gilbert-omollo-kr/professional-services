@@ -1,0 +1,30 @@
+name: refresh
+
+on:
+  schedule:
+    # Runs at 00:00 every Monday
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # Allows you to run it manually to test
+
+jobs:
+  heartbeat:
+    runs-on: [kubernetes]
+    steps:
+          - name: Install Copilot CLI
+            run: |
+              # Use the official installer; PREFIX puts it in the workspace to avoid sudo
+              curl -fsSL https://gh.io/copilot-install | PREFIX="${{ github.workspace }}/.local" bash
+              
+              # Add the new binary to the path for subsequent steps
+              echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
+
+          - name: Trigger Activity
+            run: |
+              # -p: Programmatic prompt (replaces --non-interactive)
+              # -s: Silent mode (cleaner logs)
+              # --no-ask-user: Prevents the agent from waiting for human input
+              copilot -p "Explain how to optimize a Cloud Spanner query for global performance" -s --no-ask-user
+            env:
+              # The 1.0.26 CLI prefers COPILOT_GITHUB_TOKEN but falls back to GITHUB_TOKEN
+              COPILOT_GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+              COPILOT_CONFIG_PATH: ${{ github.workspace }}/.copilot-config
