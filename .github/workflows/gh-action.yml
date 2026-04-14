@@ -1,0 +1,23 @@
+name: Copilot License Heartbeat
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Every Monday at midnight
+  workflow_dispatch: # For manual testing
+
+jobs:
+  license-ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Copilot CLI
+        run: |
+          curl -fsSL https://gh.io/copilot-install | PREFIX="${{ github.workspace }}/.local" bash
+          echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
+
+      - name: Send Activity Heartbeat
+        run: |
+          # A generic prompt to keep the license active
+          copilot -p "Summarize the latest features in GCP Vertex AI for 2026" -s --no-ask-user
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          COPILOT_CONFIG_PATH: ${{ github.workspace }}/.copilot-config
