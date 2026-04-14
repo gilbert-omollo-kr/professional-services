@@ -1,3 +1,0 @@
-custom.cloudsqlRequireHighAvailability:
-  rules:
-    - enforce: true
